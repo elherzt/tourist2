@@ -16,18 +16,22 @@ class Tourist
         end
       end
       pp flight
+      self.search_sequences(flight)
     end
 
-    def search_sequences(flight)
-      total = flight[0]
+    def self.search_sequences(flight)
+      best_time = 24
+      best_price = 1000
+      total = flight[0][0].to_i
       init = 2
       for i in 1..total
-        block_total = flight[init]
+        block_total = flight[init][0].to_i
         block_begin = init+1
         block_end   = init + block_total
         for j in block_begin..block_end
           from = flight[j][0]
           to = flight[j][1]
+          #binding.pry
           if (from == "A" and to == "Z")
             flight_time  = (flight[j][3]-flight[j][2])/(60*60)
             flight_price = flight[j][4]
@@ -37,11 +41,14 @@ class Tourist
             if (flight_price < best_price)
               best_price = flight_price
             end
+            puts "mas corta: "
+            pp flight[j]
           else
             
           end
-
+          
         end
+        init = j+2
       end
     end
   end
@@ -64,4 +71,5 @@ class Tourist
 end
 require 'time'
 require 'pp'
+require 'pry'
 Tourist.new("sample-input.txt")

@@ -14,7 +14,6 @@ class Tourist
           count += 1
         end
       end
-      #pp flight
       Sequences.search_sequences(flight)
     end
   end
@@ -27,6 +26,7 @@ class Tourist
       total = flight[0][0].to_i
       init = 2
       for i in 1..total
+        @@price = 10000
         block_total = flight[init][0].to_i
         block_begin = init+1
         block_end   = init + block_total
@@ -37,42 +37,38 @@ class Tourist
           count += 1
         end
         flight_time.sort_by!{|h| h[2]}
-        puts "---- ---- ----"
         pp flight_time
-        #binding.pry
         search_sequences_time(flight_time)
-        puts "---- ---- ----"
-        puts @@departure  
-        puts @@check  
+        puts "mas rapido salida #{@@departure}, llegada #{@@check} y cuesta #{@@price_by_time}"
+        puts "mas barato salida #{@@departure_by_price}, llegada #{@@check_by_price} y custa #{@@price}"
         min_time = @@final_time if @@final_time < min_time
         init = j+2
       end
     end
-
     def self.search_sequences_time(flight)
-      init, count, @end_, to, time = "A", 0, "Z", "ZZ", 0
-      #count = 0
-      #@end_ = "Z"
-      #to = "ZZ"
-      #time = 0
-      @@final_time = 24
+      init, count, @end_, to, time, @@final_time, arrival = "A", 0, "Z", "ZZ", 0, 24, 0
       flight.each do |fly|
         count += 1
         if fly[0] == init
           new_departure = fly[2]
-          time = (fly[3] - fly[2])/3600
+          new_price = fly[4]
+          arrival = fly[3]
           if fly[1] == @end_
             chec = fly[3]
             time = (chec - new_departure)/3600
             if @@final_time > time
               @@final_time = time 
-              @@check  = fly[3]
+              @@check  = chec
               @@departure = new_departure
+              @@price_by_time = new_price
             end
-
+            if new_price < @@price
+              @@price = new_price
+              @@departure_by_price = fly[2]
+              @@check_by_price = chec
+            end
           else
-            routes_recursive(count,fly[1],time,flight,new_departure)
-            #to = fly[1]
+            routes_recursive(count,fly[1],time,flight,new_departure,new_price,arrival)
           end
         else
         end
@@ -80,42 +76,42 @@ class Tourist
       puts @@final_time
     end
 
-    def self.routes_recursive(inicio, to, time, flight, new_departure)
+    def self.routes_recursive(inicio, to, time, flight, new_departure, new_price, arrival)
       for j in inicio..flight.length-1
-        if flight[j][0] == to
+       if (flight[j][0] == to and arrival < flight[j][3])
+          #price_copy = new_price
+          new_price = new_price + flight[j][4]
+          arrival = flight[j][3]
+          #binding.pry
           if flight[j][1] == @end_
-            #binding.pry
             chec = flight[j][3]
             time = (chec - new_departure)/3600
-            #binding.pry
             if @@final_time > time
               @@final_time = time 
               @@check  = flight[j][3]
               @@departure = new_departure
+              @@price_by_time = new_price
             end
-            to = "ZZ"
-            time = 0
+            if new_price < @@price
+              #binding.pry
+              @@check_by_price = flight[j][3]
+              @@departure_by_price = new_departure
+              #binding.pry
+              @@price = new_price
+            end
           else
-            routes_recursive(j+1, flight[j][1], time, flight, new_departure)
-            #to = flight[j][1]
+            #new_price = price_copy
+            routes_recursive(j+1, flight[j][1], time, flight, new_departure,new_price,arrival)
+
           end
+        else
         end
       end
     end
-
-    def cheap
-    end
-
-    def fast
-    end
   end
-
-
   def initialize(file_name)
     Input.read_file(file_name)
   end
-
-
 end
 require 'time'
 require 'pp'

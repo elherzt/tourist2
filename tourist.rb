@@ -18,6 +18,7 @@ class Tourist
     end
   end
   class Sequences
+    @@amount = 0
     @@departure = "no hay"
     @@check = "no hay"
     def self.search_sequences(flight)
@@ -45,6 +46,7 @@ class Tourist
         init = j+2
       end
     end
+
     def self.search_sequences_time(flight)
       init, count, @end_, to, time, @@final_time, arrival = "A", 0, "Z", "ZZ", 0, 24, 0
       flight.each do |fly|
@@ -53,6 +55,7 @@ class Tourist
           new_departure = fly[2]
           new_price = fly[4]
           arrival = fly[3]
+          #binding.pry
           if fly[1] == @end_
             chec = fly[3]
             time = (chec - new_departure)/3600
@@ -68,7 +71,8 @@ class Tourist
               @@check_by_price = chec
             end
           else
-            routes_recursive(count,fly[1],time,flight,new_departure,new_price,arrival)
+            #binding.pry
+            routes_recursive(count,fly[1],time,flight,new_departure,new_price,arrival,fly[4])
           end
         else
         end
@@ -76,13 +80,12 @@ class Tourist
       puts @@final_time
     end
 
-    def self.routes_recursive(inicio, to, time, flight, new_departure, new_price, arrival)
+    def self.routes_recursive(inicio, to, time, flight, new_departure, new_price, arrival,copy_price)
       for j in inicio..flight.length-1
-       if (flight[j][0] == to and arrival < flight[j][3])
-          #price_copy = new_price
+       if (flight[j][0] == to and arrival <= flight[j][2])
+          copy_price += flight[j][4]
           new_price = new_price + flight[j][4]
           arrival = flight[j][3]
-          #binding.pry
           if flight[j][1] == @end_
             chec = flight[j][3]
             time = (chec - new_departure)/3600
@@ -91,24 +94,23 @@ class Tourist
               @@check  = flight[j][3]
               @@departure = new_departure
               @@price_by_time = new_price
+              pp @@departure
+              pp @@check
+              puts "--- --- ---"
             end
             if new_price < @@price
-              #binding.pry
               @@check_by_price = flight[j][3]
               @@departure_by_price = new_departure
-              #binding.pry
               @@price = new_price
             end
           else
-            #new_price = price_copy
-            routes_recursive(j+1, flight[j][1], time, flight, new_departure,new_price,arrival)
-
+            routes_recursive(j+1, flight[j][1], time, flight, new_departure,new_price,arrival,flight[j][4])
           end
-        else
-        end
+       end
       end
     end
   end
+
   def initialize(file_name)
     Input.read_file(file_name)
   end
